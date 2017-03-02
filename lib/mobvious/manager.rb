@@ -10,6 +10,8 @@ module Mobvious
     # Create a new instance of this rack middleware.
     #
     # @param app Rack application that can be called.
+    CONTENT_TYPE = 'Content-Type'.freeze
+    TEXT_EVENT_STREAM = 'text/event-stream'.freeze
     def initialize(app)
       @app = app
     end
@@ -24,8 +26,10 @@ module Mobvious
 
       status, headers, body = @app.call(env)
 
-      response = Rack::Response.new(body, status, headers)
-      response_callback(request, response)
+      unless headers[CONTENT_TYPE] == TEXT_EVENT_STREAM
+        response = Rack::Response.new(body, status, headers)
+        response_callback(request, response)
+      end
 
       [status, headers, body]
     end
